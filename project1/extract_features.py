@@ -32,7 +32,8 @@ class Net:
         self.fan_ins_lvl2 = []
         self.fan_outs_lvl1 = []
         self.fan_outs_lvl2 = []
-        self.controllability = 0 
+        self.cc0 = 0 
+        self.cc1 = 0 
         self.observability = 0 
         self.nearest_ff_input = 0 
         self.nearest_ff_output = 0 
@@ -75,7 +76,70 @@ class Net:
         # print(self.name, [i for i in self.fan_outs_lvl2])
 
     def find_controllability(self): 
-        pass
+        # Primary inputs
+        if self.is_primary_input:
+            self.cc0 = 1
+            self.cc1 = 1
+            return
+
+        # Find the gate that drives THIS net
+        driver = None
+        for g in logic_gates:
+            if self.name in g.outputs:
+                driver = g
+                break
+
+        # No driver? Floating net.
+        if driver is None:
+            self.cc0 = 1
+            self.cc1 = 1
+            return
+
+        gate_type = driver.name
+
+        # Collect CC0/CC1 of input nets
+        inputs = [netlist[n] for n in driver.inputs if n != "CK"]
+
+        # ---------- GATE TYPES ----------
+        if "NOT" in gate_type:
+            In = inputs[0]
+            self.cc0 = In.cc1 + 1
+            self.cc1 = In.cc0 + 1
+
+        elif "AND" in gate_type:
+            a, b = inputs
+            self.cc1 = a.cc1 + b.cc1 + 1
+            self.cc0 = min(a.cc0, b.cc0) + 1
+
+        elif "NAND" in gate_type:
+            a, b = inputs
+            # AND then NOT
+            tmp_cc1 = a.cc1 + b.cc1 + 1
+            tmp_cc0 = min(a.cc0, b.cc0) + 1
+            self.cc1 = tmp_cc0 + 1
+            self.cc0 = tmp_cc1 + 1
+
+        elif "OR" in gate_type:
+            a, b = inputs
+            self.cc1 = min(a.cc1, b.cc1) + 1
+            self.cc0 = a.cc0 + b.cc0 + 1
+
+        elif "NOR" in gate_type: 
+            a, b = inputs
+            # OR then NOT
+            tmp_cc1 = min(a.cc1, b.cc1) + 1
+            tmp_cc0 = a.cc0 + b.cc0 + 1
+            self.cc1 = tmp_cc0 + 1
+            self.cc0 = tmp_cc1 + 1
+
+        elif "DFF" in gate_type:
+            Dnet = inputs[0]
+            self.cc0 = Dnet.cc0 + 1
+            self.cc1 = Dnet.cc1 + 1
+        else:
+            # default fallback
+            self.cc0 = 1
+            self.cc1 = 1
 
     def find_observability(self): 
         pass
@@ -101,7 +165,7 @@ class LogicGate:
         self.outputs = []
 
     def add_inputs_outputs(self, gate_params):
-        if len(gate_params) == 3:  # dff, nor, and, or, etc 
+        if len(gate_params) == 3:  # ck, dff, nor, and, or, etc 
             if gate_params[0] == "CK": # dff -> (clk, output, input)
                 self.outputs.append(gate_params[1])  # add output 
                 self.inputs.append(gate_params[0]) # ck is an input 
@@ -155,6 +219,40 @@ with open(netlist_file_path, 'r') as f:
                     logic_gates.append(logic_gate)
 
 
+def compute_all_controllability():
+    # Initialize PIs and all FF outputs as controllable
+    for n in netlist.values():
+        if n.is_primary_input:
+            n.cc0 = 1
+            n.cc1 = 1
+
+    # DFF outputs are pseudo-primary-inputs
+    for g in logic_gates:
+        if "DFF" in g.name:
+            q = g.outputs[0]
+            netlist[q].cc0 = 1
+            netlist[q].cc1 = 1
+
+    # Combinational logic
+    changed = True
+    while changed:
+        changed = False
+        for n in netlist.values():
+            driver = None
+            for g in logic_gates:
+                if n.name in g.outputs:
+                    driver = g
+                    break
+
+            if driver and "DFF" in driver.name:
+                continue  
+
+            old = (n.cc0, n.cc1)
+            n.find_controllability()
+
+            if (n.cc0, n.cc1) != old:
+                changed = True
+
 
 def propagate(): 
     for n in netlist: 
@@ -169,17 +267,16 @@ def propagate():
     for n in netlist: 
         netlist[n].find_fan_outs_level2()
 
-
-print("primary inputs", primary_inputs)
-print("primary outputs", primary_outputs)
-print("gates", [(l.name, l.inputs, l.outputs) for l in logic_gates])
-print("netlist", netlist)
+    compute_all_controllability()
 
 
 
 if __name__ == "__main__": 
     propagate() 
+
+    # debug 
     print("primary inputs", primary_inputs)
     print("primary outputs", primary_outputs)
     print("gates", [(l.name, l.inputs, l.outputs) for l in logic_gates])
+    print("controllability", [(n, netlist[n].cc0, netlist[n].cc1) for n in netlist])
     print("netlist", netlist)
