@@ -180,43 +180,44 @@ class LogicGate:
     
 
 # netlist_file_path = input("Enter netlist file you want to extract features from: ")
-netlist_file_path = "s27.v"
-with open(netlist_file_path, 'r') as f: 
-    module_found = False 
-    lines = f.readlines() 
-    # parse 
-    for line in lines: 
-        if netlist_file_path.split('.')[0] in line:
-            module_found = True 
-            continue 
+def parse(): 
+    netlist_file_path = "s15850.v"
+    with open(netlist_file_path, 'r') as f: 
+        module_found = False 
+        lines = f.readlines() 
+        # parse 
+        for line in lines: 
+            if netlist_file_path.split('.')[0] in line:
+                module_found = True 
+                continue 
 
-        if module_found:
-            lsplt = line.strip().split()
-            if lsplt: 
-                if lsplt[0] == "input": 
-                    inputs = lsplt[1].split(',')
-                    for i in inputs: 
-                        if ';' in i:
-                            i = i.replace(';', '')
-                        netlist[i] = Net(i, True, False)
-                elif lsplt[0] == "output": 
-                    outputs = lsplt[1].split(',')
-                    for o in outputs: 
-                        if ';' in o:
-                            o = o.replace(';', '')
-                        netlist[o] = Net(o, True, False)
-                elif lsplt[0] == "wire": 
-                    wires = lsplt[1].split(',')
-                    for w in wires: 
-                        if ';' in w:
-                            w = w.replace(';', '')
-                        netlist[w] = Net(w, False, False)
-                elif lsplt[0] in gate_types:  # handle gates 
-                    gate, params = lsplt[1].split('(')
-                    nets = params.split(')')[0].split(',')
-                    logic_gate = LogicGate(gate)
-                    logic_gate.add_inputs_outputs(nets)
-                    logic_gates.append(logic_gate)
+            if module_found:
+                lsplt = line.strip().split()
+                if lsplt: 
+                    if lsplt[0] == "input": 
+                        inputs = lsplt[1].split(',')
+                        for i in inputs: 
+                            if ';' in i:
+                                i = i.replace(';', '')
+                            netlist[i] = Net(i, True, False)
+                    elif lsplt[0] == "output": 
+                        outputs = lsplt[1].split(',')
+                        for o in outputs: 
+                            if ';' in o:
+                                o = o.replace(';', '')
+                            netlist[o] = Net(o, True, False)
+                    elif lsplt[0] == "wire": 
+                        wires = lsplt[1].split(',')
+                        for w in wires: 
+                            if ';' in w:
+                                w = w.replace(';', '')
+                            netlist[w] = Net(w, False, False)
+                    elif lsplt[0] in gate_types:  # handle gates 
+                        gate, params = lsplt[1].split('(')
+                        nets = params.split(')')[0].split(',')
+                        logic_gate = LogicGate(gate)
+                        logic_gate.add_inputs_outputs(nets)
+                        logic_gates.append(logic_gate)
 
 
 def compute_all_controllability():
@@ -272,7 +273,7 @@ def propagate():
 
 
 if __name__ == "__main__": 
-    propagate() 
+    parse()
 
     # debug 
     print("primary inputs", primary_inputs)
@@ -280,3 +281,4 @@ if __name__ == "__main__":
     print("gates", [(l.name, l.inputs, l.outputs) for l in logic_gates])
     print("controllability", [(n, netlist[n].cc0, netlist[n].cc1) for n in netlist])
     print("netlist", netlist)
+    propagate() 
