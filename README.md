@@ -2,6 +2,9 @@
 Project 2 
 
 ## Setup 
+Install python tkinter with `sudo apt-get install python3-tk`
+- TODO: add windows instructions
+
 Install <a href="https://ollama.com/download">Ollama</a> to support vision language model text extraction
 After installing ollama, run: `ollama pull qwen3-vl:235b-cloud`. 
 Then, run `ollama signin` and sign in with your account (you may need to create one, but the account has free starting cloud usage)

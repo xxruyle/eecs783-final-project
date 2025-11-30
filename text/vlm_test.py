@@ -20,6 +20,3 @@ def run_vlm_test():
 
     print("Average Compute Time (s): ", avg_time)
 
-if __name__ == "__main__":
-    run_vlm_test()
-

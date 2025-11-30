@@ -23,6 +23,3 @@ def run_easyocr_test():
     
     avg_time = sum(compute_times)/len(tests)
     print("Average Compute Time (s): ", avg_time)
-
-if __name__ == "__main__":
-    run_easyocr_test()

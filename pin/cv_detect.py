@@ -1,17 +1,10 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-
-IMAGES_PATH = '../ic-images'
-
-image_paths = [
-    f'{IMAGES_PATH}/A-J-28SOP-03F-SM.png',
-    f'{IMAGES_PATH}/C-T-08DIP-11F-SM.png',
-    f'{IMAGES_PATH}/C-T-48QFP-19F-SM.png',
-    f'{IMAGES_PATH}/C-T-48QFP-20F-SM.png'
-]
+from util import tests as image_paths
 
 def show(img, title="", size=(6,6)):
+    print("\tshowing...")
     plt.figure(figsize=size)
     if len(img.shape) == 2:   # grayscale
         plt.imshow(img, cmap="gray")
@@ -23,6 +16,8 @@ def show(img, title="", size=(6,6)):
 
 
 def detect_pins(img_path="../ic-images/C-T-48QFP-19F-SM.png"): 
+    print(f"{img_path}")
+
     # Load the IC image
     img = cv2.imread(img_path)
 
@@ -66,8 +61,7 @@ def detect_pins(img_path="../ic-images/C-T-48QFP-19F-SM.png"):
     show(edges, f"Inverted {img_path}")
     show(output, f"Detected Pins {img_path}")
 
-
-if __name__ == "__main__":
-    for path in image_paths:
+def run_cv_img_detect():
+    for path, expected_text in image_paths:
         detect_pins(path)
 
