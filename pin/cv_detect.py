@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from util import tests as image_paths
+from util import ic_marking_tests as image_paths
 
 def show(img, title="", size=(6,6)):
     print("\tshowing...")
