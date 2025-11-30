@@ -1,0 +1,73 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+IMAGES_PATH = '../ic-images'
+
+image_paths = [
+    f'{IMAGES_PATH}/A-J-28SOP-03F-SM.png',
+    f'{IMAGES_PATH}/C-T-08DIP-11F-SM.png',
+    f'{IMAGES_PATH}/C-T-48QFP-19F-SM.png',
+    f'{IMAGES_PATH}/C-T-48QFP-20F-SM.png'
+]
+
+def show(img, title="", size=(6,6)):
+    plt.figure(figsize=size)
+    if len(img.shape) == 2:   # grayscale
+        plt.imshow(img, cmap="gray")
+    else:
+        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    plt.title(title)
+    plt.axis("off")
+    plt.show()
+
+
+def detect_pins(img_path="../ic-images/C-T-48QFP-19F-SM.png"): 
+    # Load the IC image
+    img = cv2.imread(img_path)
+
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Apply a slight Gaussian blur to reduce noise
+    gray_blur = cv2.GaussianBlur(gray, (3, 3), 0)
+
+    # Use high-threshold inverted binary to capture shiny pins with shadows
+    # _, thresh = cv2.threshold(gray_blur, 200, 255, cv2.THRESH_BINARY_INV)
+
+    _, thresh_bright = cv2.threshold(gray_blur, 210, 255, cv2.THRESH_BINARY)
+
+
+
+    kernel = np.ones((3, 1), np.uint8)
+    closing = cv2.morphologyEx(thresh_bright, cv2.MORPH_CLOSE, kernel, iterations=1)
+    dilated = cv2.dilate(closing, kernel, iterations=1)
+
+    edges = cv2.Canny(thresh_bright, 220, 255)
+
+    combined = cv2.bitwise_or(dilated, edges)
+
+    # Find contours of pins
+    contours, _ = cv2.findContours(combined, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Filter small contours
+    pin_contours = [c for c in contours if cv2.contourArea(c) > 100 and cv2.contourArea(c) < 20000]
+
+    # Draw detected pins
+    output = img.copy()
+    # cv2.drawContours(output, pin_contours, -1, (0, 255, 0), 2)
+
+    for c in pin_contours:
+        x, y, w, h = cv2.boundingRect(c)
+        cv2.rectangle(output, (x,y), (x+w,y+h), (0,255,0), 2)
+
+    # Show results
+    # show(img, "Original")
+    # show(combined, "Combined")
+    show(edges, f"Inverted {img_path}")
+    show(output, f"Detected Pins {img_path}")
+
+
+if __name__ == "__main__":
+    for path in image_paths:
+        detect_pins(path)
+

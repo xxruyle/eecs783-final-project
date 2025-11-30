@@ -1,1 +1,5 @@
 .venv
+yolov5  
+ic-pins
+*/__pycache__/*
+__pycache__/*
