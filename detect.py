@@ -6,7 +6,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import matplotlib
-print(matplotlib.get_backend())
 
 def run_text_tests():
   run_easyocr_test()
