@@ -1,10 +1,14 @@
-from util import tests, easyocr_extract_text
+from text.util import easyocr_extract_text
+from util import tests
 import time 
 import easyocr 
+import warnings
+
+warnings.filterwarnings('ignore')
 
 EASY_OCR_READER = easyocr.Reader(['en'])
 
-if __name__ == "__main__":
+def run_easyocr_test():
     compute_times = []
     for img_filepath, expected_output in tests:
         start_time = time.time()
@@ -20,3 +24,5 @@ if __name__ == "__main__":
     avg_time = sum(compute_times)/len(tests)
     print("Average Compute Time (s): ", avg_time)
 
+if __name__ == "__main__":
+    run_easyocr_test()
