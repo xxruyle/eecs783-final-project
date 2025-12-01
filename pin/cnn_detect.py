@@ -103,6 +103,7 @@ def test(epochs):
   # Load our model
   net = Net()
   try:
+    print("Loading " + './pin_model/' + f"{epochs}pin_net.pth" + "...")
     net.load_state_dict(torch.load('./pin_model/' + f"{epochs}pin_net.pth"))
   except:
     print(f"Can't find model with {epochs} epochs")
@@ -120,7 +121,7 @@ def test(epochs):
     #use len here b/c can have less than batchsize in list returned
     for i in range(len(images)):
       label_val = (int)(labels[i][1])
-      pred_val = (int)(labels[i][1])
+      pred_val = predicted[i]
       #print(f"{name[i]}: \tlabel: {classes[label_val]} \tpredicted: {classes[pred_val]}")
       count += 1
       if label_val == pred_val:
