@@ -4,6 +4,8 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
+from util import defect_images
+import cv2
 
 import torch.nn as nn
 import torch.optim as optim
@@ -139,6 +141,21 @@ def test(epochs):
   #print("="*80 + "\n" + "\t\tSTATS\n" + "="*80)
   #print(f"Count: {count}\n\ttrue  negative: {true_neg}\ttrue  positive: {true_pos}\n\tfalse negative: {false_neg}\tfalse positive: {false_pos}")
   return (count, true_neg, true_pos, false_neg, false_pos)
+
+""" def test_img(epochs):
+  net = Net()
+  try:
+    print("Loading " + './pin_model/' + f"{epochs}pin_net.pth" + "...")
+    net.load_state_dict(torch.load('./pin_model/' + f"{epochs}pin_net.pth"))
+  except:
+    print(f"Can't find model with {epochs} epochs")
+    return (0,0,0,0,0)
+  
+  for img_path in defect_images:
+    img = cv2.imread(img_path) """
+     
+      
+   
 
 def run_cnn_img_detect():
   # TODO: implement this

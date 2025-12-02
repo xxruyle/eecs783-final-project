@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 import torchvision
+import cv2
 
 #Set seeds
 np.random.seed(0)
@@ -26,7 +27,12 @@ class PinData(Dataset):
 
     def __getitem__(self, idx):
         selected_filename = self.all_filenames[idx]
-        imagepil = PIL.Image.open(os.path.join(self.dataset_dir,selected_filename)).convert('RGB')
+        img = cv2.imread(os.path.join(self.dataset_dir,selected_filename))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        _, img = cv2.threshold(img, 210, 255, cv2.THRESH_BINARY)
+
+
+        imagepil = PIL.Image.fromarray(img).convert('RGB')
         
         #convert image to Tensor and normalize
         image = to_tensor_and_normalize(imagepil)
@@ -76,6 +82,5 @@ def to_tensor_and_normalize(imagepil): #Done with testing
     Why the ImageNet mean and stdev instead of the PASCAL VOC mean and stdev?
     Because we are using a model pretrained on ImageNet."""
     #TODO: edit normalization here
-    ChosenTransforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),
-                torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]),])
+    ChosenTransforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),])
     return ChosenTransforms(imagepil)

@@ -2,18 +2,21 @@ import torch
 from torch.utils.data import DataLoader
 import torchvision
 from torchvision.models.detection import fasterrcnn_resnet50_fpn
+#from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_ResNet50_FPN_V2_Weights
 from torchvision.datasets import ImageFolder
 from torchvision import transforms
 import torchvision.transforms as T
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("tkagg")
 import cv2
 
 from rcnn_pin_model.dataset import PinData
 
 #note: from running this, loss seems to have diminishing returns after 7 epochs
-EPOCHS = 50
+EPOCHS = 5
 PATH = './rcnn_pin_model/' + f"{EPOCHS}pin_net.pth"
 
 def show_boxes_on_img(img_path, boxes):
@@ -25,6 +28,7 @@ def show_boxes_on_img(img_path, boxes):
 
 def train():
   # Load the pre-trained Faster R-CNN model with a ResNet-50 backbone
+  #model = fasterrcnn_resnet50_fpn_v2(weights=FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT)
   model = fasterrcnn_resnet50_fpn(pretrained=True)
 
   # Number of classes (your dataset classes + 1 for background)
@@ -55,8 +59,8 @@ def train():
   lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, 
                                                                 gamma=0.1)
   # Train the model
+  model.train()
   for epoch in range(EPOCHS):
-      model.train()
       train_loss = 0.0
 
     # Training loop
@@ -85,6 +89,7 @@ def train():
 
 def test():
   model = fasterrcnn_resnet50_fpn(pretrained=True)
+  #model = fasterrcnn_resnet50_fpn_v2(weights=FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT)
   num_classes = 3  # For example, 2 classes + background
   in_features = model.roi_heads.box_predictor.cls_score.in_features
   model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
@@ -92,7 +97,7 @@ def test():
   try:
     model.load_state_dict(torch.load(PATH))
   except:
-    print(f"No model saved at {path}")
+    print(f"No model saved at {PATH}")
     return 
   
   dataset = PinData()
@@ -128,5 +133,5 @@ def testPinData():
 def do_fast_rcnn():
   #TODO: implement this
   #testPinData()
-  #train()
+  train()
   test()
