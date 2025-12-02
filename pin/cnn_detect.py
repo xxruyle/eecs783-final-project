@@ -10,6 +10,7 @@ import torch.optim as optim
 
 from pin_model.dataset import PinData
 from pin_model.net import Net
+from pin.fast_rcnn import do_fast_rcnn
 
 BATCH_SIZE = 10
 EPOCHS = 50
@@ -142,10 +143,11 @@ def test(epochs):
 def run_cnn_img_detect():
   # TODO: implement this
   #train()
-  for epoch in TRAINED_EPOCHS:
+  """ for epoch in TRAINED_EPOCHS:
     count, true_neg, true_pos, false_neg, false_pos = test(epoch)
     if (count == 0):
        continue
     print(f"Results for {epoch} epochs")
-    print(f"\ttrue  negative: {(true_neg/count) * 100}\ttrue  positive: {(true_pos/count) * 100}\n\tfalse negative: {(false_neg/count) * 100}\tfalse positive: {(false_pos/count) * 100}")
+    print(f"\ttrue  negative: {(true_neg/count) * 100}\ttrue  positive: {(true_pos/count) * 100}\n\tfalse negative: {(false_neg/count) * 100}\tfalse positive: {(false_pos/count) * 100}") """
   #testPinData()
+  do_fast_rcnn()
