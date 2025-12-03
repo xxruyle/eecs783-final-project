@@ -79,8 +79,8 @@ for img in image_paths:
     pad = 15
     x = max(x - pad*3, 0)
     y = max(y-pad*3, 0)
-    w = min(w + 5*pad, og_image.shape[1] - x)
-    h = min(h + 5*pad, og_image.shape[0] - y)
+    w = min(w + 6*pad, og_image.shape[1] - x)
+    h = min(h + 6*pad, og_image.shape[0] - y)
     boxed_img = og_image.copy()
     # cv2.rectangle(boxed_img, (x, y), (x + w, y + h), (0, 0, 255), 2)
     cv2.rectangle(gray, (x, y), (x + w, y + h), (0, 0, 0), thickness=-1)
