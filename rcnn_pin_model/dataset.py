@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 import torchvision
+from pin.cv_detect import detect_edges
 import cv2
 
 #Set seeds
@@ -27,9 +28,11 @@ class PinData(Dataset):
 
     def __getitem__(self, idx):
         selected_filename = self.all_filenames[idx]
-        img = cv2.imread(os.path.join(self.dataset_dir,selected_filename))
+        """ img = cv2.imread(os.path.join(self.dataset_dir,selected_filename))
+        #TODO: investigate this
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        _, img = cv2.threshold(img, 210, 255, cv2.THRESH_BINARY)
+        _, img = cv2.threshold(img, 210, 255, cv2.THRESH_BINARY) """
+        img = detect_edges(os.path.join(self.dataset_dir,selected_filename))
 
 
         imagepil = PIL.Image.fromarray(img).convert('RGB')

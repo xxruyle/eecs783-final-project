@@ -7,6 +7,7 @@ from torchvision.datasets import ImageFolder
 from torchvision import transforms
 import torchvision.transforms as T
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from pin.cv_detect import detect_edges
 
 import matplotlib.pyplot as plt
 import matplotlib
@@ -16,15 +17,39 @@ import cv2
 from rcnn_pin_model.dataset import PinData
 
 #note: from running this, loss seems to have diminishing returns after 7 epochs
-EPOCHS = 5
+EPOCHS = 10
 PATH = './rcnn_pin_model/' + f"{EPOCHS}pin_net.pth"
 
+def remove_deviant_boxes(boxes):
+  total_area = 0
+  cnt = len(boxes)
+  for box in boxes:
+    wdth = box[2] - box[0]
+    hght = box[3] - box[1]
+    total_area += wdth * hght
+  
+  avg_area = total_area / cnt
+
+  i = 0
+  print(boxes)
+  while(i < len(boxes)):
+    box = boxes[i]
+    wdth = box[2] - box[0]
+    hght = box[3] - box[1]
+    area = wdth * hght
+    if (area < avg_area * .6 or area > avg_area * 1.4):
+      boxes = torch.cat([boxes[0:i], boxes[i+1:]])
+      i -= 1
+    i += 1
+     
+  return boxes
+
 def show_boxes_on_img(img_path, boxes):
-    img = cv2.imread(img_path)
-    for box in boxes:
-      cv2.rectangle(img, (int(box[0]),int(box[1])), (int(box[2]),int(box[3])), (0,255,0), 2)
-    plt.imshow(img)
-    plt.show()
+  img = detect_edges(img_path)
+  for box in boxes:
+    cv2.rectangle(img, (int(box[0]),int(box[1])), (int(box[2]),int(box[3])), (0,0,0), 2)
+  plt.imshow(img)
+  plt.show()
 
 def train():
   # Load the pre-trained Faster R-CNN model with a ResNet-50 backbone
@@ -116,10 +141,12 @@ def test():
           predictions = model(images)
           # Example: print the bounding boxes and labels for the first image
           for i in range(len(predictions)):
+            #boxes = remove_deviant_boxes(predictions[i]['boxes'])
+            boxes = predictions[i]['boxes']
             print(f"For file: {files[i]}")
-            print(f"\t{predictions[i]['boxes']}")
+            print(f"\t{boxes}")
             show_boxes_on_img(dataset.dataset_dir + "/" + files[i], targets[i]['boxes'])
-            show_boxes_on_img(dataset.dataset_dir + "/" + files[i], predictions[i]['boxes'])
+            show_boxes_on_img(dataset.dataset_dir + "/" + files[i], boxes)
 
 
 def testPinData():
@@ -133,5 +160,5 @@ def testPinData():
 def do_fast_rcnn():
   #TODO: implement this
   #testPinData()
-  train()
+  #train()
   test()
