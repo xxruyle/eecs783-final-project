@@ -1,4 +1,4 @@
-IC_IMAGES_PATH = "./ic-images"
+IC_IMAGES_PATH = "./ic-images-text"
 
 
 ic_marking_tests = [
@@ -8,7 +8,7 @@ ic_marking_tests = [
     (f'{IC_IMAGES_PATH}/C-T-48QFP-20F-SM.png',  "stm32f103c8t6991uj019umys99009e42")
 ] # tuple containing image filepath and the visible text on the ic 
 
-DEFECT_IMAGES_PATH = "./defect-images"
+DEFECT_IMAGES_PATH = "./ic-images-defects"
 
 defect_images = [
   f'{DEFECT_IMAGES_PATH}/A-D-64QFP-14B-SM.png',

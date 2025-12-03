@@ -20,7 +20,7 @@ class PinData(Dataset):
     def __init__(self, transforms=None):
         #Define dataset
         current_dir = os.path.join(os.getcwd(),'rcnn_pin_model')
-        self.dataset_dir = os.path.join(os.getcwd(), 'defect-images')
+        self.dataset_dir = os.path.join(os.getcwd(), 'ic-images-defects')
         
         self.all_filenames = os.listdir(self.dataset_dir)
         self.all_labels = pd.read_csv(os.path.join(current_dir,'pin_labels.csv'),header=0,index_col=0)

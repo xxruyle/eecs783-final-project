@@ -4,7 +4,7 @@ import torch
 
 
 current_dir = os.path.join(os.getcwd(),'rcnn_pin_model')
-dataset_dir = os.path.join(os.getcwd(), 'defect-images')
+dataset_dir = os.path.join(os.getcwd(), 'ic-images-defects')
 
 all_filenames = os.listdir(dataset_dir)
 all_labels = pd.read_csv(os.path.join(current_dir,'pin_labels.csv'),header=0,index_col=0)
