@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from util import ic_marking_tests as image_paths
+from util import defect_images as image_paths
 import matplotlib
 matplotlib.use("tkagg")
 
@@ -89,6 +89,6 @@ def detect_pins(img_path="../ic-images/C-T-48QFP-19F-SM.png"):
     show(output, f"Detected Pins {img_path}")
 
 def run_cv_img_detect():
-    for path, expected_text in image_paths:
+    for path in image_paths:
         detect_pins(path)
 

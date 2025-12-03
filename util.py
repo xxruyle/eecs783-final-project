@@ -13,6 +13,6 @@ DEFECT_IMAGES_PATH = "./defect-images"
 defect_images = [
   f'{DEFECT_IMAGES_PATH}/A-D-64QFP-14B-SM.png',
   f'{DEFECT_IMAGES_PATH}/A-D-64QFP-15B-SM.png',
-  f'{DEFECT_IMAGES_PATH}/A-J-28SOP-03F-SM.png',
+  f'{DEFECT_IMAGES_PATH}/A-J-28SOP-01B-SM.png',
   f'{DEFECT_IMAGES_PATH}/C-T-28SOP-04F-SM.png',
 ] # list containing filepath of defect images
