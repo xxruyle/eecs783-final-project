@@ -1,7 +1,7 @@
 import easyocr
 import ollama 
 
-IMAGES_PATH = "../ic-images"
+IMAGES_PATH = "../ic-images-text"
 
 
 tests = [

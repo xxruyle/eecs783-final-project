@@ -21,8 +21,5 @@ The text extraction uses the ollama vision language model quen3-vl and easyocr
 - Better performance than easyocr!
 
 ### Pin Detection 
-Uses OpenCV
-- Binary Threshold Inversion 
-- Morphology 
-- Canny edge detection 
-- Contours -> bounding boxes  
+Depth Anything -> Guassian blurred Grayscale BITWISE_OR IC Mask -> Find Contours -> Bonding Boxes (BB) -> DBSCAN Cluster BB locations
+- bounding boxes that are greater than a std deviation from cluster mean width and height = defect 
