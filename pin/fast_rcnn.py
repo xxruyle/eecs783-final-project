@@ -45,7 +45,8 @@ def remove_deviant_boxes(boxes):
   return boxes
 
 def show_boxes_on_img(img_path, boxes):
-  img = detect_edges(img_path)
+  #img, _ = detect_edges(img_path)
+  img = cv2.imread(img_path)
   for box in boxes:
     cv2.rectangle(img, (int(box[0]),int(box[1])), (int(box[2]),int(box[3])), (0,0,0), 2)
   plt.imshow(img)

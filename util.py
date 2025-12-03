@@ -11,8 +11,17 @@ ic_marking_tests = [
 DEFECT_IMAGES_PATH = "./ic-images-defects"
 
 defect_images = [
-  f'{DEFECT_IMAGES_PATH}/A-D-64QFP-14B-SM.png',
-  f'{DEFECT_IMAGES_PATH}/A-D-64QFP-15B-SM.png',
-  f'{DEFECT_IMAGES_PATH}/A-J-28SOP-01B-SM.png',
-  f'{DEFECT_IMAGES_PATH}/C-T-28SOP-04F-SM.png',
+  [f'{DEFECT_IMAGES_PATH}/A-D-64QFP-14B-SM.png', []],
+  [f'{DEFECT_IMAGES_PATH}/A-D-64QFP-15B-SM.png', []],
+  [f'{DEFECT_IMAGES_PATH}/A-J-28SOP-01B-SM.png', []],
+  [f'{DEFECT_IMAGES_PATH}/C-T-28SOP-04F-SM.png', []],
+] # list containing filepath of defect images
+
+GRAY_IMAGES_PATH = "./gray-ic-defects"
+
+gray_defect_images = [
+  f'{GRAY_IMAGES_PATH}/A-D-64QFP-14B-SM.png',
+  f'{GRAY_IMAGES_PATH}/A-D-64QFP-15B-SM.png',
+  f'{GRAY_IMAGES_PATH}/A-J-28SOP-01B-SM.png',
+  f'{GRAY_IMAGES_PATH}/C-T-28SOP-04F-SM.png',
 ] # list containing filepath of defect images

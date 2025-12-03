@@ -20,7 +20,7 @@ class PinData(Dataset):
     def __init__(self, transforms=None):
         #Define dataset
         current_dir = os.path.join(os.getcwd(),'rcnn_pin_model')
-        self.dataset_dir = os.path.join(os.getcwd(), 'ic-images-defects')
+        self.dataset_dir = os.path.join(os.getcwd(), 'gray-ic-defects')
         
         self.all_filenames = os.listdir(self.dataset_dir)
         self.all_labels = pd.read_csv(os.path.join(current_dir,'pin_labels.csv'),header=0,index_col=0)
@@ -32,8 +32,8 @@ class PinData(Dataset):
         #TODO: investigate this
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         _, img = cv2.threshold(img, 210, 255, cv2.THRESH_BINARY) """
-        img = detect_edges(os.path.join(self.dataset_dir,selected_filename))
-
+        #img = detect_edges(os.path.join(self.dataset_dir,selected_filename))
+        img = cv2.imread(os.path.join(self.dataset_dir,selected_filename))
 
         imagepil = PIL.Image.fromarray(img).convert('RGB')
         

@@ -8,6 +8,7 @@ from sklearn.cluster import DBSCAN
 import statistics 
 import random
 from util import defect_images as image_paths
+from util import gray_defect_images as gray_image_paths
 
 def show(img, title="", size=(6,6)):
     plt.figure(figsize=size)
@@ -40,10 +41,10 @@ def remove_nested_boxes(bounding_boxes):
     
     return keep_boxes
 
-
-def run_depth_detect():
+def get_depth_bounding_rects():
     pipe = pipeline(task="depth-estimation", model="depth-anything/Depth-Anything-V2-Large-hf")
-    for img in image_paths:
+    for i in range(len(image_paths)):
+        img = image_paths[i][0]
         image = Image.open(img)
         og_image = np.array(image)
         depth = pipe(image)["depth"]
@@ -88,6 +89,15 @@ def run_depth_detect():
             bounding_boxes.append((x, y, w, h))
 
         bounding_boxes = remove_nested_boxes(bounding_boxes)
+        image_paths[i][1] = bounding_boxes
+
+        #show(gray, "Gray scale with ic packaging mask")
+        cv2.imwrite(gray_image_paths[i], gray)
+
+def run_depth_detect():
+    get_depth_bounding_rects()
+    for img_path, bounding_boxes in image_paths: 
+        image = Image.open(img_path)
 
         median_bb_width = statistics.median([w for x,y,w,h in bounding_boxes])
         median_bb_height = statistics.median([h for x,y,w,h in bounding_boxes])
@@ -133,7 +143,6 @@ def run_depth_detect():
                 cv2.putText(output, f"{w},{h};{median_area}", (x, y + h + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1, cv2.LINE_AA)
 
         # Show images
-        show(gray, "Gray scale with ic packaging mask")
         show(output, "Pin Detection with Cluster Outliers")
 
 # output = gray.copy()

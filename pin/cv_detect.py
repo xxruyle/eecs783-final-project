@@ -77,6 +77,6 @@ def detect_pins(img_path="../ic-images/C-T-48QFP-19F-SM.png"):
     show(output, f"Detected Pins {img_path}")
 
 def run_cv_img_detect():
-    for path in image_paths:
+    for path, _ in image_paths:
         detect_pins(path)
 
