@@ -23,6 +23,9 @@ def show(img, title="", size=(6,6)):
         plt.imshow(img, cmap="gray")
     else:
         plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+
+    plt.savefig(f"{title}")
+
     plt.title(title)
     plt.axis("off")
     plt.show()
@@ -82,7 +85,6 @@ for img in image_paths:
     w = min(w + 6*pad, og_image.shape[1] - x)
     h = min(h + 6*pad, og_image.shape[0] - y)
     boxed_img = og_image.copy()
-    # cv2.rectangle(boxed_img, (x, y), (x + w, y + h), (0, 0, 255), 2)
     cv2.rectangle(gray, (x, y), (x + w, y + h), (0, 0, 0), thickness=-1)
 
     _, thresh_bright = cv2.threshold(gray, 170, 255, cv2.THRESH_BINARY)
@@ -103,9 +105,6 @@ for img in image_paths:
     points = np.array([[x + w/2, y + h/2] for x, y, w, h in bounding_boxes])
     db = DBSCAN(eps=(median_bb_width+median_bb_height)/2 * 2, min_samples=1).fit(points)
     labels = db.labels_
-    print(labels)
-    cluster_colors = {label: (random.randint(50,255), random.randint(50,255), random.randint(50,255)) 
-                  for label in set(labels)}
 
     cluster_data = {}
     for (x, y, w, h), label in zip(bounding_boxes, labels):
@@ -123,7 +122,7 @@ for img in image_paths:
         areas = np.array(data["areas"])
         median_area = np.median(areas)
         mad_area = np.median(np.abs(areas - median_area))  # robust deviation
-        threshold = 4 * mad_area  # consider boxes >3*MAD as outliers
+        threshold = 3 * mad_area  # consider boxes >3*MAD as outliers
 
         for box, area in zip(data["boxes"], areas):
             x, y, w, h = box
@@ -138,29 +137,11 @@ for img in image_paths:
             # Draw cluster label
             cv2.putText(output, f"{label}", (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1, cv2.LINE_AA)
             # Draw width,height
-            cv2.putText(output, f"{w},{h};{median_area}", (x, y + h + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1, cv2.LINE_AA)
+            cv2.putText(output, f"{area};{median_area}", (x, y + h + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1, cv2.LINE_AA)
 
     # Show images
-    show(gray, "Gray scale with ic packaging mask")
-    show(output, "Pin Detection with Cluster Outliers")
-
-# output = gray.copy()
-# for x, y, w, h in bounding_boxes:
-#     area =w*h
-#     if abs(w - median_bb_width) > 5000 or abs(w - median_bb_height) > 5000:
-#         bb_color = (255,0,0)
-#     else: 
-#         bb_color = (0,255,0)
-#     cv2.rectangle(output, (x,y), (x+w,y+h), bb_color, 2)
-
-#     cv2.putText(
-#         output,
-#         f"{w},{h}",                # text to display
-#         (x, y - 5),               # position (above the box)
-#         cv2.FONT_HERSHEY_SIMPLEX, # font
-#         0.5,                       # font scale
-#         bb_color,                  # text color
-#         1,                         # thickness
-#         cv2.LINE_AA                # anti-aliasing
-#     )
-
+    show(og_image, "Original Image")
+    show(cv2.cvtColor(heatmap, cv2.COLOR_BGR2GRAY), "Depth Anything Grayscale")
+    show(ic_packaging_thresh, "IC Packaging Detection")
+    show(gray, "IC Packaging Mask")
+    show(output, os.path.basename(img))
