@@ -27,7 +27,9 @@ source .venv/Scripts/activate # if on windows
 
 source .venv/bin/activate # if on linux 
 
-python3 detect.py
+python3 pin_detect.py # for pin detection
+
+python3 text_detect.py # for text detection
 ```
 
 ## About 
