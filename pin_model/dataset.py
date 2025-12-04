@@ -18,10 +18,10 @@ torch.cuda.manual_seed(0)
 torch.cuda.manual_seed_all(0)
 
 class PinData(Dataset):
-    def __init__(self):      
+    def __init__(self, img_dir):      
         #Define dataset
         current_dir = os.path.join(os.getcwd(),'pin_model')
-        self.dataset_dir = os.path.join(current_dir, 'pin_images')
+        self.dataset_dir = img_dir #
         
         #E.g. self.all_filenames = ['006.png','007.png','008.png'] when setname=='val'
         self.all_filenames = os.listdir(self.dataset_dir) # ['1b1.png']
@@ -46,7 +46,13 @@ class PinData(Dataset):
         image = to_tensor_and_normalize(imagepil)
         
         #load label
-        label = torch.Tensor(self.all_labels.loc[selected_filename,:].values)
+        #print(self.dataset_dir)
+        label = torch.Tensor([0.0,0.0])
+        try:
+            label = torch.Tensor(self.all_labels.loc[selected_filename,:].values)
+        except:
+            label = torch.Tensor([0.0,0.0])
+
         
         sample = {'data':image, #preprocessed image, for input into NN
                   'label':label,

@@ -10,6 +10,8 @@ After installing ollama, run: `ollama pull qwen3-vl:235b-cloud`.
 Then, run `ollama signin` and sign in with your account (you may need to create one, but the account has free starting cloud usage)
 - To use other models, install them with `ollama pull <model>` and update `OLLAMA_MODEL` in text/vlm_test.py
 
+Install `imagemagick` with `sudo apt install imagemagick`
+
 Setting up virtual environment and installing requirements:
 ```
 python -m venv .venv 

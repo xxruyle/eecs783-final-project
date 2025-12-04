@@ -8,6 +8,8 @@ from sklearn.cluster import DBSCAN
 import statistics 
 import random
 from util import defect_images as image_paths
+from util import gray_defect_images as gray_image_paths
+from util import CROPPED_PATH
 
 def show(img, title="", save=False, size=(6,6)):
     plt.figure(figsize=size)
@@ -44,6 +46,101 @@ def remove_nested_boxes(bounding_boxes):
     
     return keep_boxes
 
+def crop_from_boxes():
+    #clear CROPPED PATH of files before remaking
+    cropped_files = os.listdir(CROPPED_PATH)
+    for file in cropped_files:
+        os.remove(CROPPED_PATH+file)
+
+    img_cnt = 0
+    #print(image_paths)
+    for img_path, boxes, _ in image_paths:
+        img = cv2.imread(img_path)
+        crop_cnt = 0
+        #print(f"boxes: {boxes}")
+        for box in boxes:
+            expand_size_length = 50
+            expand_size_width = 20
+            b = [] 
+            if (box[2] > box[3]):
+                #wider than tall 
+                b.append(box[0] - expand_size_length)
+                b.append(box[1] - expand_size_width)
+                b.append(box[2] + 2*expand_size_length)
+                b.append(box[3] + 2*expand_size_width) 
+            else:
+                #taller than wide
+                b.append(box[0] - expand_size_width)
+                b.append(box[1] - expand_size_length)
+                b.append(box[2] + 2*expand_size_width)
+                b.append(box[3] + 2*expand_size_length) 
+
+            crop = img[b[1]:b[1]+b[3], b[0]:b[0]+b[2]]
+            img_temp = img.copy()
+            cv2.rectangle(img_temp, (b[0], b[1]), (b[0]+b[2], b[1]+b[3]), (0, 255, 0), 2)
+            #show(crop, "crop")
+            #show(img_temp, "temp")
+            #print(f"{b}, {crop}")
+            if (len(crop) != 0):
+                cv2.imwrite(CROPPED_PATH + f"{img_cnt}_{crop_cnt}.png", crop)
+            #print(f"saved at" + CROPPED_PATH + f"{img_cnt}_{crop_cnt}.png")
+            crop_cnt += 1
+        img_cnt += 1
+
+    try:
+        os.system(f"mogrify -resize 200x200 -background white -gravity center -extent 200x200 {CROPPED_PATH}*.png")
+    except:
+        print(f"No files in {CROPPED_PATH}")
+
+def only_get_boxes():
+    pipe = pipeline(task="depth-estimation", model="depth-anything/Depth-Anything-V2-Large-hf")
+    for img_entry in image_paths:
+        img = img_entry[0]
+        image = Image.open(img)
+        og_image = np.array(image)
+        depth = pipe(image)["depth"]
+        depth_np = np.array(depth)
+
+        depth_norm = cv2.normalize(depth_np, None, 0, 255, cv2.NORM_MINMAX)
+        depth_uint8 = depth_norm.astype(np.uint8)
+
+        heatmap = cv2.applyColorMap(depth_uint8, cv2.COLORMAP_TURBO)
+        gray = cv2.cvtColor(heatmap, cv2.COLOR_BGR2GRAY)
+        gray =  cv2.GaussianBlur(gray, (3, 3), 0)
+
+        _, ic_packaging_thresh = cv2.threshold(gray, 110, 255, cv2.THRESH_BINARY)
+        ic_packaging_thresh = cv2.bitwise_not(ic_packaging_thresh)
+
+
+        ic_packaging_contours, _ = cv2.findContours(ic_packaging_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        largest_contour = max(
+            ic_packaging_contours,
+            key=lambda c: cv2.contourArea(c) if cv2.contourArea(c) < 0.95 * og_image.shape[0]*og_image.shape[1] else 0
+        )
+
+        x, y, w, h = cv2.boundingRect(largest_contour)
+        # Expand the bounding box slightly (e.g., 5 pixels)
+        pad = 15
+        x = max(x - pad*3, 0)
+        y = max(y-pad*3, 0)
+        w = min(w + 6*pad, og_image.shape[1] - x)
+        h = min(h + 6*pad, og_image.shape[0] - y)
+        boxed_img = og_image.copy()
+        cv2.rectangle(gray, (x, y), (x + w, y + h), (0, 0, 0), thickness=-1)
+
+        _, thresh_bright = cv2.threshold(gray, 170, 255, cv2.THRESH_BINARY)
+        contours, _ = cv2.findContours(thresh_bright, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+        pin_contours = [c for c in contours if cv2.contourArea(c) > 500 and cv2.contourArea(c) < 5000]
+        output = np.array(image).copy()
+        bounding_boxes = []
+        for c in pin_contours:
+            x, y, w, h = cv2.boundingRect(c)
+            bounding_boxes.append((x, y, w, h))
+
+        bounding_boxes = remove_nested_boxes(bounding_boxes)
+        img_entry[1] = bounding_boxes
+        img_entry[2] = [0] * len(bounding_boxes)
 
 def run_depth_detect():
     pipe = pipeline(task="depth-estimation", model="depth-anything/Depth-Anything-V2-Large-hf")
@@ -92,6 +189,8 @@ def run_depth_detect():
             bounding_boxes.append((x, y, w, h))
 
         bounding_boxes = remove_nested_boxes(bounding_boxes)
+        img_entry[1] = bounding_boxes
+        img_entry[2] = [0] * len(bounding_boxes)
 
         median_bb_width = statistics.median([w for x,y,w,h in bounding_boxes])
         median_bb_height = statistics.median([h for x,y,w,h in bounding_boxes])
