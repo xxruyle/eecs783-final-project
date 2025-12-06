@@ -14,7 +14,6 @@ import torch.optim as optim
 
 from pin_model.dataset import PinData
 from pin_model.net import Net
-from pin.fast_rcnn import do_fast_rcnn
 
 BATCH_SIZE = 10
 EPOCHS = 1000

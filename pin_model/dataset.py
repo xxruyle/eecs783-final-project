@@ -30,15 +30,9 @@ class PinData(Dataset):
         self.label_meanings = self.all_labels.columns.values.tolist()
     
     def __len__(self):
-        """Return the total number of examples in this split, e.g. if
-        self.setname=='train' then return the total number of examples
-        in the training set"""
         return len(self.all_filenames)
         
     def __getitem__(self, idx):
-        """Return the example at index [idx]. The example is a dict with keys
-        'data' (value: Tensor for an RGB image) and 'label' (value: multi-hot
-        vector as Torch tensor of gr truth class labels)."""
         selected_filename = self.all_filenames[idx]
         imagepil = PIL.Image.open(os.path.join(self.dataset_dir,selected_filename)).convert('RGB')
         
@@ -61,13 +55,7 @@ class PinData(Dataset):
         return sample
 
 
-def to_tensor_and_normalize(imagepil): #Done with testing
-    """Convert image to torch Tensor and normalize using the ImageNet training
-    set mean and stdev taken from
-    https://pytorch.org/docs/stable/torchvision/models.html.
-    Why the ImageNet mean and stdev instead of the PASCAL VOC mean and stdev?
-    Because we are using a model pretrained on ImageNet."""
-    #TODO: edit normalization here
+def to_tensor_and_normalize(imagepil):
     ChosenTransforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),
                 torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]),])
     return ChosenTransforms(imagepil)

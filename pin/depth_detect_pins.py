@@ -8,7 +8,6 @@ from sklearn.cluster import DBSCAN
 import statistics 
 import random
 from util import defect_images as image_paths
-from util import gray_defect_images as gray_image_paths
 from util import CROPPED_PATH
 
 def show(img, title="", save=False, size=(6,6)):
@@ -131,7 +130,7 @@ def only_get_boxes():
         _, thresh_bright = cv2.threshold(gray, 170, 255, cv2.THRESH_BINARY)
         contours, _ = cv2.findContours(thresh_bright, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
-        pin_contours = [c for c in contours if cv2.contourArea(c) > 500 and cv2.contourArea(c) < 5000]
+        pin_contours = [c for c in contours if cv2.contourArea(c) > 500 and cv2.contourArea(c) < 50000]
         output = np.array(image).copy()
         bounding_boxes = []
         for c in pin_contours:
